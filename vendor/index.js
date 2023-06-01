@@ -8,7 +8,7 @@ const chance = new Chance();
 
 function simulatePickup() {
   const payload = {
-    store: chance.company(),
+    store: '1-206-flowers',
     orderId: chance.guid(),
     customer: chance.name(),
     address: chance.address(),
