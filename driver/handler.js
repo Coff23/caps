@@ -13,7 +13,6 @@ const packageDelivered = (payload) => {
   socket.emit('delivered', payload);
 };
 
-//callback function to handle both functions above
 const handlePickupAndDelivered = (payload) => {
   setTimeout(() => {
     pickupOccurred(payload);
