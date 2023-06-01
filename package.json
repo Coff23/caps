@@ -2,9 +2,9 @@
   "name": "caps",
   "version": "1.0.0",
   "description": "",
-  "main": "eventpool.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node hub.js",
+    "start": "node index.js",
     "test": "jest --verbose --coverage",
     "test-watch": "jest --watchAll --verbose --coverage"
   },

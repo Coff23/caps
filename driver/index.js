@@ -1,13 +1,7 @@
 'use strict';
 
-const eventpool = require('../eventpool');
+const { io } =  require('socket.io-client');
+const socket =  io('http://localhost:3001/caps');
+const { handlePickupAndDelivered } = require('./handler');
 
-eventpool.on('pickup', (payload) => {
-  console.log('DRIVER: picked up', payload.orderId);
-  eventpool.emit('in-transit', payload);
-  console.log('DRIVER: emitted in-transit event for', payload.orderId);
-  setTimeout(() => {
-    eventpool.emit('delivered', payload);
-    console.log('DRIVER: emitted delivered event for', payload.orderId);
-  }, 1000);
-});
+socket.on('pickup', handlePickupAndDelivered);
