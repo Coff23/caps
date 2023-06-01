@@ -8,14 +8,13 @@ const server = new Server();
 
 const caps = server.of('/caps');
 
-function logger(event, payload){
+function logger(event, payload) {
   const timestamp = new Date();
   console.log('EVENT: ', { event, timestamp, payload });
 }
 
 server.on('connection', (socket) => {
   console.log('Server socket connection to event server: ', socket.id);
-
 });
 
 caps.on('connection', (socket) => {
@@ -23,17 +22,17 @@ caps.on('connection', (socket) => {
 
   socket.on('pickup', (payload) => {
     logger('pickup', payload);
-    caps.emit('pickup', payload);
+    socket.broadcast.emit('pickup', payload);
   });
 
   socket.on('in-transit', (payload) => {
     logger('in-transit', payload);
-    caps.emit('in-transit', payload);
+    socket.broadcast.emit('in-transit', payload);
   });
 
   socket.on('delivered', (payload) => {
     logger('delivered', payload);
-    caps.emit('delivered', payload);
+    socket.broadcast.emit('delivered', payload);
   });
 
 });
