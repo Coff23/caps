@@ -24,9 +24,9 @@ caps.on('connection', (socket) => {
   });
 
   socket.on('pickup', (payload) => {
-    let currentQueue = messageQueue.read('DRIVER');
+    let currentQueue = messageQueue.read('driver');
     if(!currentQueue){
-      let queueKey = messageQueue.store('DRIVER', new Queue());
+      let queueKey = messageQueue.store('driver', new Queue());
       currentQueue = messageQueue.read(queueKey);
     }
     currentQueue.store(payload.messageId, payload);
@@ -57,10 +57,12 @@ caps.on('connection', (socket) => {
   });
 
   socket.on('getAll', (payload) => {
+    console.log('attempting to get all');
     let currentQueue = messageQueue.read(payload.queueId);
     if(currentQueue && currentQueue.data) {
-      Object.keys(currentQueue.data).forEach(orderId => {
-        socket.emit('pickup', currentQueue.read(orderId));
+      Object.keys(currentQueue.data).forEach(messageId => {
+        let message = currentQueue.read(messageId);
+        socket.emit(message.event, message);
       });
     }
   });

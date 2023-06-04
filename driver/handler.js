@@ -1,14 +1,14 @@
 'use strict';
 
-const { io } =  require('socket.io-client');
-const socket =  io('http://localhost:3001/caps');
+// const { io } =  require('socket.io-client');
+// const socket =  io('http://localhost:3001/caps');
 
-const pickupOccurred = (payload) => {
+const pickupOccurred = (payload, socket) => {
   console.log('DRIVER: picked up', payload.orderId);
   socket.emit('in-transit', payload);
 };
 
-const packageDelivered = (payload) => {
+const packageDelivered = (payload, socket) => {
   console.log('DRIVER: delivered', payload.orderId);
   socket.emit('delivered', payload);
 };
