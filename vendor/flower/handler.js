@@ -23,6 +23,7 @@ const orderHandler = (socket, order=null) => {
     order,
   };
 
+  console.log('VENDOR: ORDER ready for pickup:', payload);
   socket.emit('pickup', payload);
 };
 

@@ -7,5 +7,5 @@ const socket = io('http://localhost:3001/caps');
 socket.on('delivered', deliveredMessage);
 
 setInterval(() => {
-  orderHandler();
+  orderHandler(socket);
 }, 5000);

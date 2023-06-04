@@ -10,7 +10,11 @@ const server = new Server();
 
 server.listen(PORT);
 
-const caps = server.of('/caps');
+// const caps = server.of('/caps');
+
+const caps = new Server(server, {
+  path: '/caps',
+});
 
 function logger(event, payload) {
   const timestamp = new Date();
