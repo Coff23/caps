@@ -24,7 +24,7 @@ afterAll(() => {
   consoleSpy.mockRestore();
 });
 
-describe('Flower handler tests', () => {
+describe('Widget handler tests', () => {
 
   //Chat GPT helped with line 31 to 41 with generating socket and payload and requiring the socket down here for connect
   let socket;

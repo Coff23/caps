@@ -1,11 +1,16 @@
 'use strict';
 
-const { orderHandler, deliveredMessage } = require('./handler');
 const { io } = require('socket.io-client');
 const socket = io('http://localhost:3001/caps');
+const { createOrder , packageDelivered } = require('./handler');
 
-socket.on('delivered', deliveredMessage);
+socket.emit('getAll', {store: 'acme-widgets'});
 
 setInterval(() => {
-  orderHandler(socket);
-}, 5000);
+  createOrder(socket);
+}, 8000);
+
+socket.on('delivered', (payload) => {
+  packageDelivered(payload);
+  socket.emit('received', payload);
+});

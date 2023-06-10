@@ -1,40 +1,28 @@
 'use strict';
 
-// const { io } =  require('socket.io-client');
-// const socket =  io('http://localhost:3001/caps');
 var Chance = require('chance');
 var chance = new Chance();
-const store = '1-206-flowers';
 
-const orderHandler = (socket, order=null) => {
-  if(!order){
-    order = {
-      store,
-      orderId: chance.guid(),
+const createOrder = (socket, payload = null) => {
+  if(!payload){
+    payload = {
+      store: '1-800-flowers',
+      orderID: chance.guid(),
       customer: chance.name(),
       address: chance.address(),
     };
+
   }
 
-  let payload = {
-    event: 'pickup',
-    messageId: order.orderId,
-    queueId: store,
-    order,
-  };
-
-  console.log('VENDOR: ORDER ready for pickup:', payload);
+  socket.emit('JOIN', payload.store);
+  console.log(`VENDOR: Order #:${payload.orderID} ready for pickup.`);
   socket.emit('pickup', payload);
+
 };
 
-const thankDriver = (payload) =>
-  console.log('VENDOR: Thank you for your order', payload.order.customer);
-
-const deliveredMessage = (payload) => {
-  setTimeout(() => {
-    thankDriver(payload);
-  }, 1000);
+const packageDelivered = (payload) => {
+  console.log(`VENDOR: Thank you for your order ${payload.customer}`);
 };
 
-module.exports = { orderHandler, deliveredMessage, thankDriver };
+module.exports = { createOrder, packageDelivered };
 
