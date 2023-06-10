@@ -1,94 +1,78 @@
 'use strict';
 
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config();
 const { Server } = require('socket.io');
 const PORT = process.env.PORT || 3002;
 const Queue = require('./lib/queue');
-const messageQueue = new Queue;
-
+let eventQueue = new Queue();
 const server = new Server();
-
-server.listen(PORT);
-
-// const caps = server.of('/caps');
-
-const caps = new Server(server, {
-  path: '/caps',
-});
-
-function logger(event, payload) {
-  const timestamp = new Date();
-  console.log('EVENT: ', { event, timestamp, payload });
-}
+const caps = server.of('/caps');
 
 caps.on('connection', (socket) => {
-  console.log('Server socket connection to event server: ', socket.id);
+  console.log('Caps socket connection to server: ', socket.id);
+
+  socket.on('JOIN', (room) => {
+    console.log('Possible rooms -----', socket.adapter.rooms);
+    console.log('Payload is in this room ----', room);
+    socket.join(room);
+  });
+
   socket.onAny((event, payload) => {
-    logger(event, payload);
+    const timestamp = new Date();
+    console.log('EVENT: ', { event, timestamp, payload });
   });
 
   socket.on('pickup', (payload) => {
-    let currentQueue = messageQueue.read('driver');
-    if(!currentQueue){
-      let queueKey = messageQueue.store('driver', new Queue());
-      currentQueue = messageQueue.read(queueKey);
+    let currentQueue = eventQueue.read('DRIVER');
+    if (!currentQueue) {
+      let queueKey = eventQueue.store('DRIVER', new Queue());
+      currentQueue = eventQueue.read(queueKey);
     }
-    currentQueue.store(payload.messageId, payload);
+
+    currentQueue.store(payload.orderID, payload);
+
     socket.broadcast.emit('pickup', payload);
   });
 
-  socket.on('received', (payload) => {
-    let currentQueue = messageQueue.read(payload.queueId);
-    if(!currentQueue) {
-      throw new Error('we have a message but no queue');
-    }
-    let order = currentQueue.remove(payload.messageId);
-    socket.broadcast.emit('received', order);
-  });
-
   socket.on('in-transit', (payload) => {
-    socket.broadcast.emit('in-transit', payload);
+
+    caps.emit('in-transit', payload);
   });
 
   socket.on('delivered', (payload) => {
-    let currentQueue = messageQueue.read(payload.store);
-    if(!currentQueue) {
-      let queueKey = messageQueue.store(payload.store, new Queue());
-      currentQueue = messageQueue.read(queueKey);
+    let currentQueue = eventQueue.read(payload.store);
+    if (!currentQueue) {
+      let queueKey = eventQueue.store(payload.store, new Queue());
+      currentQueue = eventQueue.read(queueKey);
     }
-    currentQueue.store(payload.store, payload);
-    socket.broadcast.emit('delivered', payload);
+
+    currentQueue.store(payload.orderID, payload);
+    console.log('console log in the delivered socket.on at server', currentQueue);
+
+    caps.emit('delivered', payload);
+  });
+
+  socket.on('received', (payload) => {
+    let id = payload.queueId ? payload.queueId : payload.store;
+    let currentQueue = eventQueue.read(id);
+    if (!currentQueue) {
+      throw new Error('No queue found for this store:', payload.store);
+    }
+
+    let order = currentQueue.remove(payload.orderID);
+    socket.broadcast.emit('received', order);
   });
 
   socket.on('getAll', (payload) => {
-    console.log('attempting to get all');
-    let currentQueue = messageQueue.read(payload.queueId);
-    if(currentQueue && currentQueue.data) {
-      Object.keys(currentQueue.data).forEach(messageId => {
-        let message = currentQueue.read(messageId);
-        socket.emit(message.event, message);
+    console.log('attempting to get all orders');
+    let id = payload.queueId ? payload.queueId : payload.store;
+    let currentQueue = eventQueue.read(id);
+    if (currentQueue && currentQueue.data) {
+      Object.keys(currentQueue.data).forEach(orderID => {
+        socket.emit('pickup', currentQueue.read(orderID));
       });
     }
   });
 });
 
-// caps.on('connection', (socket) => {
-//   console.log('Caps socket connection to server: ', socket.id);
-
-//   socket.on('pickup', (payload) => {
-//     logger('pickup', payload);
-//     socket.broadcast.emit('pickup', payload);
-//   });
-
-//   socket.on('in-transit', (payload) => {
-//     logger('in-transit', payload);
-//     socket.broadcast.emit('in-transit', payload);
-//   });
-
-//   socket.on('delivered', (payload) => {
-//     logger('delivered', payload);
-//     socket.broadcast.emit('delivered', payload);
-//   });
-
-// });
-
+server.listen(PORT);

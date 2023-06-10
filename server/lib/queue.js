@@ -1,22 +1,20 @@
 'use strict';
 
 class Queue {
-  constructor() {
+  constructor(){
     this.data = {};
   }
 
-  store(key, value) {
+  store(key,value ){
     this.data[key] = value;
-    console.log('something was added to the queue');
     return key;
   }
 
-  read(key) {
+  read(key){
     return this.data[key];
   }
 
-  remove(key) {
-    console.log('something was removed from the queue');
+  remove(key){
     let value = this.data[key];
     delete this.data[key];
     return value;
